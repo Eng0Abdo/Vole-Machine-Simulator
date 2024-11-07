@@ -233,21 +233,31 @@ public:
 
 class Memory {
 private:
-    map<int, string> memory;
+    map<int, pair<string, string> > memory;
 public:
     Memory() {
-        for (int i = 0; i < 256; i++) {
-            memory[i] = "00";
+        for (int i = 0; i < 256*2; i++) {
+            memory[i].first = "00";
+            memory[i].second = "00";
         }
     }
 
-    string getCell(int address) {
-        return memory[address];
+    string getWholeCell(int adress) {
+        return memory[adress].first + memory[adress].second;
+    }
+
+    string getCellData(int adress) {
+        return memory[adress].second;
     }
 
 
-    void setCell(int address, string val) {
-        memory[address] = val;
+    void setCell(int adress, string val) {
+        memory[adress].second = val;
+    }
+
+    void setWholeCell(int adress, string val) {
+        memory[adress].first = val.substr(0, 2);
+        memory[adress].second = val.substr(2, 2);
     }
 };
 
@@ -256,7 +266,7 @@ private:
     ALU alu;
 public:
     void load(int idxReg, int intMem, Register& reg, Memory& mem) {
-        reg.setCell(idxReg, mem.getCell(intMem));
+        reg.setCell(idxReg, mem.getCellData(intMem));
         reg.outputState();
     }
 
@@ -327,10 +337,10 @@ public:
 
     void fetch(Memory& mem) {
         if (programCounter < 256) {
-            string instructionPair = mem.getCell(programCounter);
-            instruction = instructionPair[0];
-            instructionRegister = instructionPair[1];
-            data = mem.getCell(++programCounter);
+            string wholeInstraction = mem.getWholeCell(programCounter);
+            instruction = wholeInstraction[0];
+            instructionRegister = wholeInstraction[1];
+            data = mem.getCellData(programCounter);
             programCounter++;
         }
         else {
@@ -430,13 +440,13 @@ public:
 
         // Load program data into memory
         programData.clear();
-        for (size_t i = 0; i < content.size(); i += 2) {
-            string two_bits = content.substr(i, 2);
-            programData.push_back(two_bits);
+        for (int i = 0; i < content.size(); i += 4) {
+            string four_bits = content.substr(i, 4);
+            programData.push_back(four_bits);
         }
 
         for (size_t i = 0; i < programData.size(); ++i) {
-            memory.setCell(i, programData[i]);
+            memory.setWholeCell(i, programData[i]);
         }
 
         cout << "File loaded and validated successfully." << endl;
@@ -444,9 +454,13 @@ public:
 
     void outputState() {
         cout << "Machine state:" << endl;
-        for (int i = 0; i < 256; i += 2) {
-            cout << memory.getCell(i) << " " << memory.getCell(i + 1) << endl;
+        for (int i = 0; i < 256; i++) {
 
+            cout << memory.getWholeCell(i) << " ";
+
+            if ((i + 1) % 16 == 0) {
+                cout << endl;
+            }
         }
         cout << endl;
     }
