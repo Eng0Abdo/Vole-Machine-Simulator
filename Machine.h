@@ -287,7 +287,7 @@ public:
 
     void jump(int idxReg, int idxMem, Register& reg, int& PC) {
         if (reg.getCell(idxReg) == reg.getCell(0)) {
-            PC = idxMem;
+            PC = idxMem / 2;
             reg.outputState();
         }
     }
@@ -384,7 +384,6 @@ public:
         }
         else if (instruction == 'B' || instruction == 'b') {
             cu.jump(alu.hexaToDecimal(instructionRegister), alu.hexaToDecimal(data), regist, programCounter);
-            cout << "cell number = " << alu.hexaToDecimal(data) << endl;
         }
         else if (instruction == 'C' || instruction == 'c') {
             cout << " End of simulation ^_^\n";
